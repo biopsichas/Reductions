@@ -4,24 +4,37 @@ output:
   flexdashboard::flex_dashboard:
     orientation: columns
     vertical_layout: fill
-knit: (function(inputFile, encoding) { 
+# runtime: shiny
+knit: (function(inputFile, encoding) {
   rmarkdown::render(inputFile,
-                    encoding=encoding, 
+                    encoding=encoding,
                     output_file=file.path(dirname(inputFile), "../output/", 'ataskaita.html')) })
 ---
 
 ```{r setup, include=FALSE}
 library(flexdashboard)
+library(leaflet)
+source("analysis.R")
+source("function.R")
 ```
 
-Column {data-width=650}
+Sumažinimų lentelė
+===================================== 
+
+
+Column
 -----------------------------------------------------------------------
 
-### Chart A
+### Reikalingi sumažinimai
 
 ```{r}
+create_dt(reductions_by_sources)
 
 ```
+
+
+Page 2
+===================================== 
 
 Column {data-width=350}
 -----------------------------------------------------------------------
@@ -30,11 +43,51 @@ Column {data-width=350}
 
 ```{r}
 
+
 ```
 
 ### Chart C
 
 ```{r}
+
+# rsconnect::deployApp('report.Rmd')
+```
+
+Žemėlapiai
+===================================== 
+
+Column {.tabset}
+-----------------------------------------------------------------------
+
+### Nitratai
+
+```{r}
+
+report_maps("NO3")
+
+```
+
+### Bendras azotas
+
+```{r}
+
+report_maps("N")
+
+```
+
+### Fosfatai
+
+```{r}
+
+report_maps("PO4")
+
+```
+
+### Bendras fosforas
+
+```{r}
+
+report_maps("P")
 
 ```
 

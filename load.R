@@ -1,5 +1,10 @@
+###################################################################################################
+## Pakrauname į atminti reikalingus duomenis ir apdorojame, jei reikia, ne tik daugiau 3 eilučių ##
+###################################################################################################
+
 library(tidyverse)
 library(readxl)
+library(sf)
 
 data_folder <- "../input/"
 year_from <- 2014
@@ -39,6 +44,13 @@ wb_to_mst <- readRDS(paste0(data_folder, "wb_mst.rds"))
 ##Pakrauname reikalingus kokybės vertinimo duomenis
 lake_wb_eval_14_18 <- read_excel(paste0(data_folder, "ezeru_bukle_2014_2018.xlsx"), sheet=2)
 riv_wb_eval_14_18 <- read_excel(paste0(data_folder, "upiu_bukle_2014_2018m.xlsx"), sheet=1) 
+
+##Pakrauname upių vandens telkinius su GIS informacija
+wb_rivers_sf <- sf::st_read(dsn = paste0(data_folder,"GISDATA.gdb"), layer = "WB_line_150420", quiet = TRUE)
+
+##Pakrauname ežerų vandens telkinius su GIS informacija
+wb_lakes_sf <- sf::st_read(dsn = paste0(data_folder,"GISDATA.gdb"), layer = "WB_Lakes_150420", quiet = TRUE)
+
 
 
 

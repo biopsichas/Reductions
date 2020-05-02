@@ -1,3 +1,7 @@
+##################################
+## Paruošiame duomenis analizei ##
+##################################
+
 source("clean.R")
 
 ##Paruošiame debitų duomenis vandens telkiniams
@@ -73,36 +77,50 @@ load <- load_mon %>%
   full_join(load_mod, by = c("vt_kodas"="wb_code", "param")) %>% 
   mutate(fload = ifelse(!is.na(load), load, mload),
          source = ifelse(!is.na(load), "S", "M")) %>% 
-  select(-load, - mload) %>% 
-  mutate_if(is.numeric, round, 0) 
+  select(-load, - mload) %>%
+  select(-flow) %>% 
+  mutate_if(is.numeric, round, 0) %>%
+  group_by(vt_kodas, param) %>% 
+  slice(which.max(fload)) %>% 
+  ungroup() %>% 
+  spread(param, fload) 
+colnames(load)[3:6] <- paste0("l_", colnames(load)[3:6], sep="")
 
 rm(load_mon, load_mod)
 
 ##Suskaičiuojame leistinus krūvius į vandens telkinį
 max_wb_load <- wb_names %>% 
   inner_join(Q_load_mon, by = c("VT kodas" = "vt_kodas")) %>% 
-  left_join(lakes_type, by = c("VT kodas" = "vt_kodas")) 
+  left_join(lakes_type, by = c("VT kodas" = "vt_kodas")) %>% 
+  mutate(l_type = as.integer(l_type))
 
-max_wb_load <- cbind(max_wb_load, NO3.N = mapply(max_load, "NO3.N", max_wb_load$tipas, max_wb_load$fflow, max_wb_load$l_type) )
+max_wb_load <- cbind(max_wb_load, NO3.N = mapply(max_load, "NO3.N", max_wb_load$tipas, max_wb_load$fflow, max_wb_load$l_type))
+max_wb_load <- cbind(max_wb_load, PO4.P = mapply(max_load, "PO4.P", max_wb_load$tipas, max_wb_load$fflow, max_wb_load$l_type))
+max_wb_load <- cbind(max_wb_load, N.total = mapply(max_load, "N.total", max_wb_load$tipas, max_wb_load$fflow, max_wb_load$l_type))
+max_wb_load <- cbind(max_wb_load, P.total = mapply(max_load, "P.total", max_wb_load$tipas, max_wb_load$fflow, max_wb_load$l_type))
 
-max_load <- function(param, wb_type, flow, lakes_type = NA) { 
-  if (param == "NO3.N"){
-    if (wb_type == "U"){
-      NO3.N <- 2.3 * flow * 31557.6
-    } else if (wb_type == "E") {
-      if(apie ezerus)
-    }
-  }
-}
+##Suskaičiuojame pasiskirtyma tarp sutelktųjų ir pasklidųjų šaltinių
+load_dist <- mod_data %>% 
+  select(-Basin, - Outflow, -Year, -YIELD_TOTAL) %>% 
+  group_by(CATCHMENTID) %>% 
+  summarize_all(mean) %>% 
+  mutate_if(is.numeric, round, 3) %>% 
+  inner_join(wb_to_mod_sub, by = c("CATCHMENTID" = "Modelled catchment ID")) %>% 
+  select(-CATCHMENTID, -ends_with("BACKGROUND"), -ends_with("TRANSBOUNDARY"), -ends_with("TOTAL")) %>% 
+  rename(wb_code = `WB code`) %>% 
+  gather(param, values, -wb_code) %>% 
+  mutate(param = tolower(param),
+         values = round(values, 0)) %>% 
+  separate(param, c("par", "source"), sep = "_") %>% 
+  spread(source, values) %>% 
+  mutate(sum = agricultural + pointsource + stormwater) %>% 
+  mutate(agri_p = round(agricultural/sum, 2),
+         point_p = round(pointsource/sum, 2),
+         storm_p = round(stormwater/sum, 2)) %>% 
+  select(-c(sum, agricultural, pointsource, stormwater)) %>% 
+  gather(source, value, - par, -wb_code) %>% 
+  unite("param", par:source, sep = "_") %>% 
+  spread(param, value)
 
 
   
-plot(load_mon$Flow, load_mon$q)  
-cor(load_mon$Flow, load_mon$q)
-qplot(load, 
-      mload, 
-      data = load %>% filter(load < 500000), 
-      geom = c("point", "smooth"), 
-      method = "lm", 
-      alpha = I(1 / 5), 
-      se = FALSE)
