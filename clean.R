@@ -49,27 +49,27 @@ clean_14_18 <- clean_14_18_0 %>%
 rm(clean_14_18_0, riv_wb_eval_14_18, lake_wb_eval_14_18)
 
 ##Sudarome labai pakeistų ir dirbtinių vanden stelkinių sąrašą
-riv_lpvt_dvt <- wb_rivers_sf %>% 
-  select(WBriver_code, DVT, LPVT) %>% 
-  st_set_geometry(NULL) %>% 
-  mutate(WBriver_code = as.character(sub("^", "LT", WBriver_code))) %>% 
-  mutate(DVT = as.numeric(DVT)) %>% 
-  mutate_if(is.numeric, ~replace(., is.na(.), 0)) %>% 
+riv_lpvt_dvt <- wb_rivers_sf %>%
+  select(WBriver_code, DVT, LPVT) %>%
+  st_set_geometry(NULL) %>%
+  mutate(WBriver_code = as.character(sub("^", "LT", WBriver_code))) %>%
+  mutate(DVT = as.numeric(DVT)) %>%
+  mutate_if(is.numeric, ~replace(., is.na(.), 0)) %>%
   rename(wb_code = WBriver_code)
 
-lake_lpvt_dvt <- wb_lakes_sf %>% 
-  select(MS_CD, DVT, LPVT) %>% 
-  st_set_geometry(NULL) %>% 
-  rename(wb_code = MS_CD) %>% 
+lake_lpvt_dvt <- wb_lakes_sf %>%
+  select(MS_CD, DVT, LPVT) %>%
+  st_set_geometry(NULL) %>%
+  rename(wb_code = MS_CD) %>%
   mutate(wb_code = as.character(wb_code))
 
-lpvt_dvt <- bind_rows(riv_lpvt_dvt, lake_lpvt_dvt) %>% 
-  filter(nchar(wb_code) == 11) %>% 
-  distinct() %>% 
-  mutate(changed = ifelse(LPVT == 1 | DVT == 1, 1, 0)) %>% 
+lpvt_dvt <- bind_rows(riv_lpvt_dvt, lake_lpvt_dvt) %>%
+  filter(nchar(wb_code) == 11) %>%
+  distinct() %>%
+  mutate(changed = ifelse(LPVT == 1 | DVT == 1, 1, 0)) %>%
   select(-LPVT, -DVT)
 
-rm(riv_lpvt_dvt, lake_lpvt_dvt)  
+rm(riv_lpvt_dvt, lake_lpvt_dvt)
 
 ##Paruošiame GIS duomenis
 wb_rivers_sf <- wb_rivers_sf %>% 

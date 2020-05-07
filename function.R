@@ -1,4 +1,6 @@
 library(DT)
+library(ggplot2)
+library(plotly)
 ##Funkcija išvalyti monitoringo vertinimo  duomenis
 clean_wb_eval <- function(table){
   if (startsWith(as.character(table[1,1]), "R")){
@@ -69,7 +71,12 @@ max_load <- function(param, wb_type, flow, lakes_type) {
 }
 
 ##Funkcija lentelėms pateikti
-create_dt <- function(x,y=""){
+create_dt <- function(x, param, y=""){
+  x <- x %>% 
+    filter(!is.na(paste0(param, "_total")))  %>% 
+    filter(eval(as.name(paste0(param, "_total"))) < 0) %>% 
+    select(Pavadinimas, `VT kodas`, tipas, source, dist_available, starts_with(paste0(param,"_"))) %>% 
+    arrange(Pavadinimas)
   DT::datatable(x,
                 extensions = 'Buttons',
                 options = list(initComplete = JS(
@@ -86,9 +93,9 @@ create_dt <- function(x,y=""){
 gis_data_prep <- function(sf_df, param){
   sf_df <- sf_df %>% 
     inner_join(reductions_by_sources, by = c("wb_code" = "VT kodas")) %>% 
-    filter(!is.na(paste0(param, "_total", sep = "")))  %>% 
-    filter(eval(as.name(paste0(param, "_total", sep = ""))) < 0) %>% 
-    select(wb_code, Pavadinimas, source, dist_available, starts_with(paste(param,"_", sep = "")))
+    filter(!is.na(paste0(param, "_total")))  %>% 
+    filter(eval(as.name(paste0(param, "_total"))) < 0) %>% 
+    select(wb_code, Pavadinimas, source, dist_available, starts_with(paste0(param,"_")))
   sf_df$quartile <- ntile(sf_df[[paste0(param, "_total")]], 4) ##Paskaičiuoja kvartilius
   return(sf_df)
 }
@@ -105,28 +112,28 @@ report_maps <- function(param){
     addPolylines(color = "red", weight = 4/rivers$quartile, opacity = 1,
                  popup = ~paste("Vandens telkinio pavadinimas:", rivers$Pavadinimas, "<br>",
                                 "Vandens telkinio kodas:", rivers$wb_code, "<br>",
-                                "Reikalingas bendras sumažinimas:", rivers[[paste0(param, "_total")]], "kg", "<br>",
-                                "Sumažinimas iš žemės ūkio:", rivers[[paste0(param, "_agri")]], "kg", "<br>",
-                                "Sumažinimas iš sutelktųjų šaltinių:",rivers[[paste0(param, "_point")]], "kg", "<br>",
-                                "Sumažinimas iš miesto pasklidųjų šaltinių:", rivers[[paste0(param, "_urban_diffuse")]], "kg", "<br>",
-                                "Duomenų šaltinis:", rivers$source, "<br>",
-                                "Prieimami paskirtymo duomenys:", rivers$dist_available, "<br>"),
-                 label = ~paste(rivers$Pavadinimas), group = "Upės")
+                                "Reikalingas bendras sumazinimas:", rivers[[paste0(param, "_total")]], "kg", "<br>",
+                                "Is zemes ukio:", rivers[[paste0(param, "_agri")]], "kg", "<br>",
+                                "Is sutelktuju saltiniu:",rivers[[paste0(param, "_point")]], "kg", "<br>",
+                                "Is miesto paskliduju saltiniu:", rivers[[paste0(param, "_urban_diffuse")]], "kg", "<br>",
+                                "Duomenu saltinis:", rivers$source, "<br>",
+                                "Apkrovu pasiskirtymo duomenys:", rivers$dist_available, "<br>"),
+                 label = ~paste(rivers$Pavadinimas), group = "Upes")
   if (param %in% c("N", "P")){
     gc <- gc %>% 
       addPolygons(data = lakes, color = "red", weight = 4/lakes$quartile, opacity = 1, 
                   popup = ~paste("Vandens telkinio pavadinimas:", lakes$Pavadinimas, "<br>",
                                  "Vandens telkinio kodas:", lakes$wb_code, "<br>",
-                                 "Reikalingas bendras sumažinimas:", lakes[[paste0(param, "_total")]], "kg", "<br>",
-                                 "Sumažinimas iš žemės ūkio:", lakes[[paste0(param, "_agri")]], "kg", "<br>",
-                                 "Sumažinimas iš sutelktųjų šaltinių:",lakes[[paste0(param, "_point")]], "kg", "<br>",
-                                 "Sumažinimas iš miesto pasklidųjų šaltinių:", lakes[[paste0(param, "_urban_diffuse")]], "kg", "<br>",
-                                 "Duomenų šaltinis:", lakes$source, "<br>",
-                                 "Prieimami paskirtymo duomenys:", lakes$dist_available, "<br>"),
-                  label = ~paste(lakes$Pavadinimas), group = "Ežerai / tvenkiniai") %>% 
+                                 "Reikalingas bendras sumazinimas:", lakes[[paste0(param, "_total")]], "kg", "<br>",
+                                 "Is zemes ukio:", lakes[[paste0(param, "_agri")]], "kg", "<br>",
+                                 "Is sutelktuju saltiniu:",lakes[[paste0(param, "_point")]], "kg", "<br>",
+                                 "Is miesto paskliduju saltiniu:", lakes[[paste0(param, "_urban_diffuse")]], "kg", "<br>",
+                                 "Duomenu saltinis:", lakes$source, "<br>",
+                                 "Apkrovu pasiskirtymo duomenys:", lakes$dist_available, "<br>"),
+                  label = ~paste(lakes$Pavadinimas), group = "Ezerai / tvenkiniai") %>% 
       addLayersControl(
         baseGroups = c("CartoDB (numatytas)", "OSM", "ESRI ortofoto"),
-        overlayGroups = c("Upės", "Ežerai / tvenkiniai"), 
+        overlayGroups = c("Upes", "Ezerai / tvenkiniai"), 
         options = layersControlOptions(collapsed = TRUE))
   } else {
     gc <- gc %>% 
@@ -136,3 +143,67 @@ report_maps <- function(param){
   }
   gc
 }
+
+##Funkcija paskaičiuoti procentų indikatorius
+calc_proc_gauge <- function(param){ 
+  with_reductions <- reductions_by_sources %>% 
+    select(starts_with(paste0(param,"_", sep = ""))) %>% 
+    filter(!is.na(paste0(param, "_total")))  %>% 
+    filter(eval(as.name(paste0(param, "_total"))) < 0) %>% 
+    count()
+  if (param %in% c("NO3", "PO4")){
+    total_numbers <- wb_names %>% 
+      filter(tipas == "U") %>% 
+      count()
+  } else {
+    total_numbers <- wb_names %>% 
+      count()
+  }
+  rate <- as.integer(round((with_reductions/total_numbers) * 100, 0))
+  gauge(rate, min = 0, max = 100, symbol = '%', gaugeSectors(
+    success = c(0, 10), warning = c(11, 20), danger = c(21, 100)
+  ))
+}
+
+##Funkcija histogramoms paruošti
+plot_hist <- function(param){ 
+  df <- reductions_by_sources %>% 
+    select(starts_with(paste0(param,"_total"))) %>% 
+    filter(!is.na(paste0(param, "_total")))  %>% 
+    filter(eval(as.name(paste0(param, "_total"))) < 0) %>% 
+    mutate(r = .[[1]] * -1)
+  graph <- ggplot(df, aes(x = r)) + 
+    geom_histogram(fill = 'skyblue', color = 'grey30', bins = 20) + 
+    scale_x_log10() +
+    labs(x = "Sumazinimas kg", y = "VT skaicius") +
+    theme_bw() 
+  fig <- ggplotly(graph, tooltip = "text") %>% layout(
+    margin = list(l = 5, r = 0, b = 0, t = 0, pad = 0))
+  fig
+}
+
+##Funkcija skrituliams paruošti
+plot_pie <- function(param){ 
+  df <- reductions_by_sources %>% 
+    select(starts_with(paste0(param,"_"))) %>% 
+    filter(!is.na(paste0(param, "_total")))  %>% 
+    filter(eval(as.name(paste0(param, "_total"))) < 0) %>% 
+    mutate_at(c(1:4), ~. * -1) %>% 
+    colSums()
+  df <- as.data.frame(df, ) %>% 
+    rename(value = df) %>% 
+    slice(-1) %>% 
+    mutate(proc = (round(value / sum(value), 2) * 100))
+  df$names <- c("Zemes ukis", "Nuotekos", "Miesto pasklidoji")
+  colors <- c('rgb(211,94,96)', 'rgb(128,133,133)', 'rgb(144,103,167)')
+  fig <- plot_ly(df, labels = ~names, values = ~proc, type = 'pie', textposition = 'inside', 
+                 textinfo = 'label+percent', insidetextfont = list(color = '#FFFFFF'),
+                 marker = list(colors = colors,
+                               line = list(color = '#FFFFFF', width = 1)),
+                 showlegend = FALSE)
+  fig <- fig %>% layout(xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+                        yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+                        margin = list(l = 0, r = 0, b = 0, t = 0, pad = 0))
+  fig
+}
+
