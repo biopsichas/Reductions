@@ -83,6 +83,3 @@ wb_lakes_sf <- wb_lakes_sf %>%
   rename(wb_code = MS_CD) %>% 
   mutate(wb_code = as.character(wb_code)) %>% 
   st_transform(crs = 4326)
-
-
-  

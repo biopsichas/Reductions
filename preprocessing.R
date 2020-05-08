@@ -121,6 +121,3 @@ load_dist <- mod_data %>%
   gather(source, value, - par, -wb_code) %>% 
   unite("param", par:source, sep = "_") %>% 
   spread(param, value)
-
-
-  

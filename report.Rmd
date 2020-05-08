@@ -26,7 +26,6 @@ Rezultatų santrauka
 - **Antra eilutė kaip taršos sumažinimai paskirstyti tarp šaltinių.**
 - **Trečia eilutė pateikia kaip taršos sumažinimai paskristyti tarp vandens telkinių.**
 
-
 Row
 -----------------------------------------------------------------------
 

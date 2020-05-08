@@ -50,8 +50,3 @@ wb_rivers_sf <- sf::st_read(dsn = paste0(data_folder,"GISDATA.gdb"), layer = "WB
 
 ##Pakrauname ežerų vandens telkinius su GIS informacija
 wb_lakes_sf <- sf::st_read(dsn = paste0(data_folder,"GISDATA.gdb"), layer = "WB_Lakes_150420", quiet = TRUE)
-
-
-
-
-
