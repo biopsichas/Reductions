@@ -1,6 +1,7 @@
 library(DT)
 library(ggplot2)
 library(plotly)
+library(stringr)
 ##Funkcija išvalyti monitoringo vertinimo  duomenis
 clean_wb_eval <- function(table){
   if (startsWith(as.character(table[1,1]), "R")){
@@ -71,12 +72,20 @@ max_load <- function(param, wb_type, flow, lakes_type) {
 }
 
 ##Funkcija lentelėms pateikti
-create_dt <- function(x, param, y=""){
+create_dt <- function(x, param){
   x <- x %>% 
     filter(!is.na(paste0(param, "_total")))  %>% 
     filter(eval(as.name(paste0(param, "_total"))) < 0) %>% 
     select(Pavadinimas, `VT kodas`, tipas, source, dist_available, starts_with(paste0(param,"_"))) %>% 
-    arrange(Pavadinimas)
+    arrange(Pavadinimas) %>% 
+    rename(Tipas = tipas,
+           `Saltinis` = source,
+           `Tarsos paskirtymas` = dist_available) %>% 
+    rename_at(vars(ends_with("_total")), ~paste0(word(.,1,sep = "_")," bendras")) %>% 
+    rename_at(vars(ends_with("_agri")), ~paste0(word(.,1,sep = "_")," zemes ukis")) %>% 
+    rename_at(vars(ends_with("_point")), ~paste0(word(.,1,sep = "_")," nuotekos")) %>% 
+    rename_at(vars(ends_with("_urban_diffuse")), ~paste0(word(.,1,sep = "_")," miesto pasklidoji"))
+  
   DT::datatable(x,
                 extensions = 'Buttons',
                 options = list(initComplete = JS(
@@ -86,7 +95,10 @@ create_dt <- function(x, param, y=""){
                   dom = 'Blfrtip',
                   buttons = c('copy', 'csv', 'excel', 'pdf', 'print'),
                   lengthMenu = list(c(10,25,50,-1),
-                                    c(10,25,50,"All"))), caption = y, height = "100%")
+                                    c(10,25,50,"All")),
+                  columnDefs = list(list(className = 'dt-center', targets="_all"))), 
+                caption = paste("Vienetai lenteleje yra", substr(param, 1, 1), "kg per metus"), 
+                height = "100%")
 }
 
 ##Funkcija sujungti vandens telkinių GIS duomenis ir analizės rezultatus
@@ -152,11 +164,11 @@ calc_proc_gauge <- function(param){
     filter(eval(as.name(paste0(param, "_total"))) < 0) %>% 
     count()
   if (param %in% c("NO3", "PO4")){
-    total_numbers <- wb_names %>% 
-      filter(tipas == "U") %>% 
+    total_numbers <- wb_names %>%
+      filter(tipas == "U") %>%
       count()
   } else {
-    total_numbers <- wb_names %>% 
+    total_numbers <- wb_names %>%
       count()
   }
   rate <- as.integer(round((with_reductions/total_numbers) * 100, 0))

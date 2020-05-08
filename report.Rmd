@@ -22,9 +22,9 @@ source("function.R")
 Rezultatų santrauka
 ===================================== 
 
-- Pirmas eilutė pateikia koks vandens telkinių procentas reikalauja sumažinimų nuo visų vandens telkinių (įvertintų pagal nurodytą parametrą). 
-- Antra eilutė kaip taršos sumažinimai paskirstyti tarp šaltinių.
-- Trečia eilutė pateikia kaip taršos sumažinimai paskristyti tarp vandens telkinių.
+- **Pirmas eilutė pateikia koks vandens telkinių procentas reikalauja sumažinimų nuo visų vandens telkinių (įvertintų pagal nurodytą parametrą).**
+- **Antra eilutė kaip taršos sumažinimai paskirstyti tarp šaltinių.**
+- **Trečia eilutė pateikia kaip taršos sumažinimai paskristyti tarp vandens telkinių.**
 
 
 Row
@@ -185,19 +185,23 @@ Row
 
 1. Suskaičiuoti 2014 - 2018 m. [vandens kokybės stebėsenos](http://vanduo.gamta.lt/cms/index?rubricId=5fc649b0-4bc3-44de-82b1-84c481a6124e) ir modeliavimo rezultatų vidurkiai.
 
-2. Paruošti 2014 - 2018 m. vidutiniai debitai vandens telkiniams suskaičiuojant vandens stebėsenos ir modeliavimo rezultatų vidurkį periodui. Vandens stebėsenos vandens debitų rezultatai vandens telkiniams turėjo tik dvyliką momentinių verčių, todėl vidurkis su modeliavimo rezultatais padėjo apimamt pikines debito vertes debito vidurkio skaičiavimui.  
+2. Paruošti 2014 - 2018 m. vidutiniai debitai vandens telkiniams, suskaičiuojant vandens stebėsenos ir modeliavimo rezultatų vidurkį periodui. Vandens stebėsenos debitų rezultatai vandens telkiniams turėjo dvyliką momentinių rezultatų, todėl vidurkis su modeliavimo rezultatais padėjo apimti pikines debito vertes vidurkio skaičiavimui.  
 
-3. Apjungti vandens kokybės stebėsenos ir modeliavimo rezultatai bei priskirti vandens telkiniams, kurių būklę reprezentuoja.
-Prioritetas buvo teikiamas vandens stebėsenos rezultatams. T.y. jeigu vandens telkiniui buvo priskirti ir stebėsenos ir modeliavimo rezultatai, skaičiavimuose buvo naudojami stebėsenos. Jei prieinami tik modeliavimo, tik tada naudojami modeliavimo rezultatai. 
+3. Apjungti vandens kokybės stebėsenos ir modeliavimo rezultatai bei priskirti vandens telkiniams, kurių būklę jie reprezentuoja. Prioritetas buvo teikiamas vandens stebėsenos rezultatams. Tai reiškia, jeigu vandens telkiniui buvo prieinami ir stebėsenos ir modeliavimo rezultatai, skaičiavimuose buvo naudojami tik stebėsenos rezultatai. Modeliavimo rezultatai naudojami tik tiems vandens telkiniams, kuriems nebuvo vandens kokybės stebėsenos rezultatų. 
 
-4. Panaudojant vandens telkinių daugiamečius debitus ir koncentracijas priskirtas gautas vidutinis metinis taršos krūvis vandens telkinyje.  
+4. Panaudojant vandens telkinių daugiamečius debitus ir koncentracijas suskaičiuotas vidutinis metinis taršos krūvis vandens telkinyje.  
 
-5. Panaudojant "geros" būklės koncentracijas iš ["Paviršinių vandens telkinių būklės nustatymo metodikos"](https://e-seimas.lrs.lt/portal/legalActEditions/lt/TAD/TAIS.296626?faces-redirect=true) ir paruoštus daugemečius debitus paskaičiuotas maksimalus "geros" būklės vandens telkinio taršos krūvis. 
+5. Panaudojant "geros būklės" koncentracijas iš [Paviršinių vandens telkinių būklės nustatymo metodikos](https://e-seimas.lrs.lt/portal/legalActEditions/lt/TAD/TAIS.296626?faces-redirect=true) ir paruoštus daugiamečius debitus paskaičiuotas maksimalus "geros būklės" vandens telkinio taršos krūvis. 
 
-6. Esamą daugemetį taršos krūvį atėmus iš maksimalaus "geros" būklės vandens telkinio buvo gautas reikalingas mažiausias taršos sumažinimas vandens telkinyje norint pasiekti "gerą" vandens telkinio būklę.
+6. Paskaičiuotą daugiametį vandens telkinio taršos krūvį atėmus iš maksimalaus "geros būklės" taršos krūvio buvo gautas reikalingas mažiausias taršos krūvio sumažinimas vandens telkinyje norint pasiekti "gerą būklę" vandens telkinyje.
 
-7. Panaudojant vandens telkinio modeliavimo rezultatus, vandens telkiniams buvo paskaičiuotas taršos pasiskirtymas tarp žemės ūkio, nuotekų ir miestų pasklidujų šaltinių. Jei modeliavinmo rezultatų vandens telkiniui nebuvo, pasiskirstymas tarp šaltinių paskaičiuotas panaudojus vidurkį tarp esančių duomenų. Kiti šaltiniai kaip gamtinis fonas ar tarptautinė tarša nebuvo įtraukti į taršos pasiskirstymo skaičiavimą, kadangi jiems nėra prasmės išsikelti mažinimo tikslus. 
+7. Panaudojant vandens telkinio modeliavimo rezultatus, vandens telkiniams buvo paskaičiuotas taršos krūvių pasiskirtymas tarp žemės ūkio, nuotekų ir miestų pasklidujų šaltinių (apimančių nesurenkamas lietaus nuotekas ir neprijungtų prie nuotekų tinklų gyventojų taršą). Jei modeliavimo rezultatų vandens telkiniui nebuvo, pasiskirstymas tarp šaltinių buvo paskaičiuotas panaudojus vidurkį tarp esančių įvertinimų atskiriems parametrams. Kiti šaltiniai kaip gamtinis fonas ar tarptautinė tarša nebuvo įtraukti į taršos pasiskirstymo skaičiavimą, kadangi jiems nėra prasmės ar galimybių išsikelti mažinimo tikslus. 
 
-8. Pasiskirtymo tarp šaltinių koefientai (kurių bendra suma lygi 1) buvo sudauginti iš reikalingų sumažinimų vandens telkinyje ir gauti reikalingi mažiausi sumažinimai iš šaltinių norint pasiekti "gerą" vandens telkinio būklę. 
- 
+8. Pasiskirtymo tarp šaltinių koefientai (kurių bendra suma lygi 1) buvo sudauginti iš reikalingų sumažinimų vandens telkinyje ir gauti reikalingi mažiausi sumažinimai iš atskirų šaltinių norint pasiekti "gerą būklę" vandens telkinyje. 
+
+Šiuos rezultatus reiktų interpretuoti taip: **pateikti skaičiai nurodo mažiausius reikalingus sumažinimus iš kiekvieno taršos šaltinio išleidžiančio taršą į pasirinktą vandens telkinį, kad būtų pasiekta "gera būklė" tame vandens telkinyje**. Jeigu, kuris nors šaltinis to sumažinimo nepasiekia, tai gali kompensuoti didesni taršos sumažinimai kituose šaltiniuose. Taip pat svarbu paminėti, kad sumažinimai yra paskaičiuoti vidutinėmis klimatinėmis ir hidrologinėmis sąlygomis buvusiomis 2014 - 2018 m. Klimatinės ir hidrologinės sąlygos metai iš metų kinta. Todėl norint užtikrintai pasiekti "gerą būklę" vandens telkinyje pateikti reikalingi sumažinimai turėtų būti didesni, kad eliminuotų ekstremalių gamtinių sąlygų poveikį. Be to, reikalingi sumažinimai taip pat turėtų būti didesni, jeigu yra atliekami ne pačiame vandens telkinyje, o jo aukštupyje ar mažuosiuose intakuose. Tai yra svarbu, nes sumažinimai pasiekti aukštupiuose dėl taršos sulaikymo procesų bus mažesnį žemiau esančiuose vandens telkiniuose.   
+
+Atliktų skaičiavimų ir rezultatų pateikimo programinis R kodas yra pateiktas [github tinklapyje](https://github.com/biopsichas/Reductions). 
+
+Darbą atliko Hidrografinio tinklo skyriaus vyr. specialistas Svajūnas Plungė. Klausimus ar pastabas siųskite el. paštu svajunas.plunge@aaa.am.lt.
 

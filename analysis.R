@@ -40,7 +40,12 @@ reductions_by_sources <- reductions_tot %>%
   mutate_at(vars(starts_with("ptotal_")), ~. * r_P.total) %>% 
   mutate_if(is.numeric, round, 0) %>% 
   rename_at(vars(oldnames), ~ newnames) %>% 
-  select(1:4, dist_available, everything())
+  left_join(lpvt_dvt, by = c("VT kodas" = "wb_code")) %>% 
+  mutate(changed = ifelse(changed == 1, "Taip", "Ne"),
+         dist_available = ifelse(dist_available == "Y", "Yra", "Nera"),
+         source = ifelse(source == "S", "Stebesena", "Modelis"), 
+         tipas = ifelse(tipas == "U", "Upe", "Ezeras")) %>% 
+  select(1:3, changed, source, dist_available, everything())
 
 rm(oldnames, newnames, reductions_tot)
 

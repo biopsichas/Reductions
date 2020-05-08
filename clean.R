@@ -33,7 +33,7 @@ lakes <- bind_rows(lakes1, lakes2) %>%
          PO4.P = po4_p,
          P.total = p_bendras)
 lakes$Year <- lubridate::year(lakes$Date)
-lakes <- lakes %>% filter(Year > 1995)
+lakes <- lakes %>% filter(Year >= year_from)
 
 mon_data <- bind_rows(mon_data, lakes)
 
