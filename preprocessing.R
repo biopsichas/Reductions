@@ -1,7 +1,6 @@
 ##################################
 ## Paruošiame duomenis analizei ##
 ##################################
-
 source("clean.R")
 
 ##Paruošiame debitų duomenis vandens telkiniams

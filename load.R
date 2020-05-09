@@ -1,7 +1,6 @@
 ###################################################################################################
 ## Pakrauname į atminti reikalingus duomenis ir apdorojame, jei reikia, ne tik daugiau 3 eilučių ##
 ###################################################################################################
-
 library(tidyverse)
 library(readxl)
 library(sf)

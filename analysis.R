@@ -1,7 +1,6 @@
 ###################################################
 ## Skaičiuojame, analizuojame, gauname rezultatus##
 ###################################################
-
 source("preprocessing.R")
 library("xlsx")
 
@@ -47,7 +46,16 @@ reductions_by_sources <- reductions_tot %>%
          tipas = ifelse(tipas == "U", "Upe", "Ezeras")) %>% 
   select(1:3, changed, source, dist_available, everything())
 
+reductions_by_sources_saving <- reductions_by_sources %>% 
+  left_join(max_wb_load[, c(2, 6:9) ], by = "VT kodas") %>% 
+  rename_at(vars(NO3.N, PO4.P, N.total, P.total), funs(paste0("Max load: ", .))) %>% 
+  left_join(load[,c(1, 3:6)], by = c("VT kodas" = "vt_kodas")) %>% 
+  rename_at(vars(l_N.total, l_NO3.N, l_P.total, l_PO4.P), funs(paste0("Current load: ", substring(., 3)))) %>% 
+  left_join(catch_id_wb[,c(1, 4)], by = c("VT kodas" = "code")) %>% 
+  rename (`Area km2` = area) %>% 
+  mutate(`Area km2` = round(`Area km2`, 1))
+
 rm(oldnames, newnames, reductions_tot)
 
-write.xlsx(reductions_by_sources, file = paste0(output_folder, "sumazinimai.xlsx"), sheetName = "rezultatai", 
+write.xlsx(reductions_by_sources_saving, file = paste0(output_folder, "sumazinimai.xlsx"), sheetName = "rezultatai", 
            row.names = FALSE, append = FALSE)

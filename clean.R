@@ -1,7 +1,6 @@
 #################################################
 ## Apdorojame ir išvalome reikalingus duomenis ##
 #################################################
-
 library(lubridate)
 source("load.R")
 source("function.R")
